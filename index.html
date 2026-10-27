@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dinner</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dinner">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#ffffff; --ink:#000000; --ink2:#3c3c43; --muted:#8e8e93; --sep:rgba(60,60,67,.12);
+    --tint:#007aff; --tint-soft:rgba(0,122,255,.12); --ph1:#e9e4dc; --ph2:#d8d1c5;
+    --shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#000000; --card:#1c1c1e; --ink:#ffffff; --ink2:#ebebf5; --muted:#8e8e93; --sep:rgba(84,84,88,.4);
+      --tint:#0a84ff; --tint-soft:rgba(10,132,255,.18); --ph1:#2c2c2e; --ph2:#3a3a3c; --shadow:none; }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:max(28px,calc(env(safe-area-inset-top) + 12px)) 22px max(40px,calc(env(safe-area-inset-bottom) + 16px))}
+  main{max-width:520px;margin:0 auto}
+  .screen{display:none;animation:fade .18s ease}.screen.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  h1{font-size:34px;line-height:1.15;font-weight:700;letter-spacing:-.4px;margin:10px 0 4px}
+  .sub{color:var(--muted);font-size:16px;margin:0 0 22px}
+  .section{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:26px 2px 10px}
+  .back{display:inline-flex;align-items:center;gap:2px;background:none;border:0;color:var(--tint);font-size:17px;padding:6px 0;margin:0 0 6px;cursor:pointer;font-family:inherit}
+  .back svg{width:12px;height:20px}
+
+  /* buttons */
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:15px;font-size:17px;font-weight:600;cursor:pointer;background:var(--card);color:var(--tint);font-family:inherit;box-shadow:var(--shadow);margin-top:12px}
+  .btn.primary{background:var(--tint);color:#fff}
+  .btn.ghost{background:transparent;box-shadow:none;color:var(--muted);font-weight:500}
+  .btn:active{opacity:.7}
+
+  /* theme tiles */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
+  .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .tile .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px;opacity:.9}
+  .tile .label{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 12px;text-align:left;color:#fff;font-size:20px;font-weight:700;background:linear-gradient(transparent,rgba(0,0,0,.55));letter-spacing:-.2px}
+  .tile .label small{display:block;font-size:13px;font-weight:500;opacity:.85}
+
+  /* meal cards */
+  .meal{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+  .meal .photo{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,var(--ph1),var(--ph2))}
+  .meal .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .meal .photo .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px}
+  .meal .body{padding:14px 16px 16px}
+  .meal h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px}
+  .meal .note{color:var(--muted);font-size:15px;margin:2px 0 12px}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .act{border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .act.pick{background:var(--tint);color:#fff}
+  .act.info{background:var(--tint-soft);color:var(--tint)}
+  .act:active{opacity:.7}
+
+  /* info / proposal */
+  .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:18px 16px;margin-bottom:12px}
+  .card h2{margin:0;font-size:22px;letter-spacing:-.3px}
+  .card .note{color:var(--muted);font-size:15px;margin:2px 0 10px}
+  .ing{list-style:none;margin:0;padding:0}
+  .ing li{padding:11px 0;border-bottom:1px solid var(--sep);font-size:17px}
+  .ing li:last-child{border-bottom:0}
+  .pill{display:inline-block;background:var(--tint-soft);color:var(--tint);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600;margin-bottom:8px}
+  .mini{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:10px;margin-bottom:10px}
+  .mini .thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none;background:linear-gradient(135deg,var(--ph1),var(--ph2));position:relative}
+  .mini .thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+  .mini .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .mini .t{flex:1}.mini .t b{display:block;font-size:17px}.mini .t span{color:var(--muted);font-size:14px}
+  .mini .x{background:none;border:0;color:var(--muted);font-size:22px;padding:6px 8px;cursor:pointer}
+  .toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(10px);background:rgba(28,28,30,.92);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;opacity:0;transition:all .2s;pointer-events:none;backdrop-filter:blur(10px)}
+  .toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<main>
+
+<!-- HOME -->
+<section id="home" class="screen">
+  <h1 id="homeTitle">What's for dinner?</h1>
+  <p class="sub">Pick a theme, or see a full list of options</p>
+  <div class="tiles" id="tiles"></div>
+  <button class="btn primary" onclick="openAll()">See full list</button>
+</section>
+
+<!-- ALL -->
+<section id="all" class="screen">
+  <button class="back" onclick="go('home')"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back</button>
+  <h1>All meals</h1>
+  <p class="sub">A–Z. Pick one, or tap Info for the ingredients.</p>
+  <div id="allList"></div>
+</section>
+
+<!-- THEME -->
+<section id="theme" class="screen">
+  <button class="back" onclick="go('home')"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back</button>
+  <h1 id="themeTitle"></h1>
+  <p class="sub">Pick one, or tap Info for the ingredients.</p>
+  <div id="mealList"></div>
+</section>
+
+<!-- INFO -->
+<section id="info" class="screen">
+  <button class="back" onclick="history.back()"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back</button>
+  <div id="infoCard"></div>
+  <button class="btn primary" onclick="copyIngredients()">Copy ingredients</button>
+  <button class="btn" onclick="pickFromInfo()">Pick this meal</button>
+</section>
+
+<!-- PROPOSAL -->
+<section id="proposal" class="screen">
+  <button class="back" onclick="go('home')"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Home</button>
+  <h1>Your pick</h1>
+  <p class="sub">Send it as a message.</p>
+  <div id="proposalCards"></div>
+  <button class="btn" id="altBtn" onclick="go('home')">Add an alternative</button>
+  <button class="btn primary" onclick="share()">Share</button>
+  <button class="btn ghost" onclick="copyLink()">Copy link only</button>
+</section>
+
+<!-- RECEIVED -->
+<section id="received" class="screen">
+  <h1 id="recvTitle">What's for dinner?</h1>
+  <p class="sub" id="recvSub"></p>
+  <div id="recvCards"></div>
+  <button class="btn ghost" onclick="location.href=location.pathname">Make my own pick</button>
+</section>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Repertoire ----------
+// Photo convention: img/<meal id>.jpg  (falls back to a placeholder if missing)
+const THEMES = [
+  { id:'soup', name:'Soup', emoji:'🥣', meals:[
+    { id:'cesnecka', name:'Česnečka', note:'Czech garlic soup',
+      ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] }
+  ]},
+  { id:'meat', name:'Meat', emoji:'🍔', meals:[
+    { id:'burgers', name:'Burgers', note:'Classic beef burgers',
+      ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] }
+  ]}
+];
+
+// ---------- Helpers ----------
+const $ = id => document.getElementById(id);
+const find = (t,m) => { const th=THEMES.find(x=>x.id===t); const me=th&&th.meals.find(x=>x.id===m); return me?{theme:th,meal:me}:null; };
+const allMeals = () => THEMES.flatMap(t=>t.meals.map(m=>({t:t.id,m:m.id})));
+const img = (x) => `<img src="img/${x.meal.id}.jpg" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()"><div class="ph" style="display:none">${x.theme.emoji}</div>`;
+function mealTime(){ const d=new Date(); return (d.getDay()===0||d.getDay()===6) && d.getHours()<14 ? 'lunch' : 'dinner'; }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1800); }
+function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); history.pushState({s:id},''); }
+window.addEventListener('popstate', e=>{ const s=(e.state&&e.state.s)||'home'; document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on')); $(s).classList.add('on'); });
+
+let infoOf = null;   // {theme, meal} shown on Info
+let picks = [];      // [{t,m}] max 2
+
+// ---------- Rendering ----------
+function mealCard(x){
+  return `<div class="meal"><div class="photo">${img(x)}</div><div class="body"><h2>${x.meal.name}</h2>
+    <div class="actions"><button class="act pick" onclick="pick('${x.theme.id}','${x.meal.id}')">Pick</button><button class="act info" onclick="openInfo('${x.theme.id}','${x.meal.id}')">Info</button></div></div></div>`;
+}
+function renderHome(){
+  $('homeTitle').textContent = `What's for ${mealTime()}?`;
+  $('tiles').innerHTML = THEMES.map(t=>{ const cover=t.meals[0]; return `<button class="tile" onclick="openTheme('${t.id}')">${cover?`<img src="img/${cover.id}.jpg" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()">`:''}<div class="ph" style="display:${cover?'none':'flex'}">${t.emoji}</div><div class="label">${t.name}<small>${t.meals.length} meal${t.meals.length===1?'':'s'}</small></div></button>`; }).join('');
+}
+function openTheme(id){ const t=THEMES.find(x=>x.id===id); $('themeTitle').textContent=t.name; $('mealList').innerHTML=t.meals.map(m=>mealCard({theme:t,meal:m})).join(''); go('theme'); }
+function openInfo(t,m){ infoOf=find(t,m); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.meal.name}</h2><ul class="ing">${infoOf.meal.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
+function openAll(){ const items=allMeals().map(p=>find(p.t,p.m)).sort((a,b)=>a.meal.name.localeCompare(b.meal.name,'cs')); $('allList').innerHTML=items.map(mealCard).join(''); go('all'); }
+
+// ---------- Ingredients → Notes ----------
+async function copyIngredients(){ const s=`${infoOf.meal.name}\n`+infoOf.meal.ingredients.map(i=>'• '+i).join('\n'); try{ await navigator.clipboard.writeText(s); toast('Copied — paste into Notes'); }catch(e){ prompt('Copy this:', s); } }
+
+// ---------- Pick → share ----------
+function pick(t,m){ if(!picks.some(p=>p.t===t&&p.m===m)) picks.push({t,m}); picks=picks.slice(-2); renderProposal(); go('proposal'); }
+function pickFromInfo(){ pick(infoOf.theme.id, infoOf.meal.id); }
+function removePick(i){ picks.splice(i,1); if(!picks.length) return go('home'); renderProposal(); }
+function renderProposal(){
+  $('proposalCards').innerHTML = picks.map((p,i)=>{ const x=find(p.t,p.m); return `<div class="mini"><div class="thumb">${img(x)}</div><div class="t"><b>${x.meal.name}</b><span>${picks.length>1?'Option '+(i+1):''}</span></div><button class="x" onclick="removePick(${i})" aria-label="Remove">×</button></div>`; }).join('');
+  $('altBtn').style.display = picks.length>=2?'none':'flex';
+}
+function buildLink(){ const u=new URL(location.href); u.search=''; u.hash=''; u.searchParams.set('p', picks.map(p=>p.t+'.'+p.m).join(',')); return u.toString(); }
+function buildText(){ return `What's for ${mealTime()}? ${picks.map(p=>find(p.t,p.m).meal.name).join(' or ')} → `; }
+async function share(){ const url=buildLink(), text=buildText(); if(navigator.share){ try{ await navigator.share({text,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copyLink(); }
+async function copyLink(){ const s=buildText()+buildLink(); try{ await navigator.clipboard.writeText(s); toast('Copied — paste it into a message'); }catch(e){ prompt('Copy this:', s); } }
+
+// ---------- Received ----------
+function renderReceived(param){
+  const items=param.split(',').map(s=>{ const [t,m]=s.split('.'); return find(t,m); }).filter(Boolean);
+  if(!items.length) return false;
+  $('recvTitle').textContent=`What's for ${mealTime()}?`;
+  $('recvSub').textContent = items.length>1 ? 'Two ideas — which one?' : 'One idea.';
+  $('recvCards').innerHTML = items.map((x,i)=>`<div class="meal"><div class="photo">${img(x)}</div><div class="body">${items.length>1?`<div class="pill">Option ${i+1}</div>`:''}<h2>${x.meal.name}</h2><ul class="ing" style="margin-top:10px">${x.meal.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div></div>`).join('');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $('received').classList.add('on');
+  return true;
+}
+
+// ---------- Boot ----------
+renderHome();
+const p=new URLSearchParams(location.search).get('p');
+if(!(p && renderReceived(p))){ $('home').classList.add('on'); history.replaceState({s:'home'},''); }
+</script>
+</body>
+</html>
