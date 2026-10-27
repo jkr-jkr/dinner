@@ -42,6 +42,7 @@
   /* theme tiles */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
+  .tile.plain{background:#c7c7cc}
   .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .tile .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px;opacity:.9}
   .tile .label{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 12px;text-align:left;color:#fff;font-size:20px;font-weight:700;background:linear-gradient(transparent,rgba(0,0,0,.55));letter-spacing:-.2px}
@@ -52,11 +53,11 @@
   .meal .photo{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,var(--ph1),var(--ph2))}
   .meal .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .meal .photo .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px}
-  .meal .body{padding:14px 16px 16px}
-  .meal h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px}
+  .meal .body{padding:22px 20px 22px}
+  .meal h2{margin:0 0 18px;font-size:24px;font-weight:700;letter-spacing:-.3px}
   .meal .note{color:var(--muted);font-size:15px;margin:2px 0 12px}
   .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .act{border:0;border-radius:12px;padding:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .act{border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
   .act.pick{background:var(--tint);color:#fff}
   .act.info{background:var(--tint-soft);color:var(--tint)}
   .act:active{opacity:.7}
@@ -137,68 +138,98 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ---------- Repertoire ----------
-// Photo convention: img/<meal id>.jpg  (falls back to a placeholder if missing)
+// ---------- Themes (filters) ----------
+// cover: any image path, or null for a plain grey tile
 const THEMES = [
-  { id:'soup', name:'Soup', emoji:'🥣', meals:[
-    { id:'cesnecka', name:'Česnečka', note:'Czech garlic soup',
-      ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] }
-  ]},
-  { id:'meat', name:'Meat', emoji:'🍔', meals:[
-    { id:'burgers', name:'Burgers', note:'Classic beef burgers',
-      ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] }
-  ]}
+  { id:'soup',  name:'Soup',  emoji:'🥣', cover:'img/pumpkin-soup.jpg' },
+  { id:'pasta', name:'Pasta', emoji:'🍝', cover:'img/gnocchi-anchovy.jpg' },
+  { id:'meat',  name:'Meat',  emoji:'🥩', cover:'img/burgers.jpg' },
+  { id:'fish',  name:'Fish',  emoji:'🐟', cover:'img/teriyaki-salmon.jpg' },
+  { id:'salad', name:'Salad', emoji:'🥗', cover:'img/pumpkin-salad.jpg' },
+  { id:'bread', name:'Bread', emoji:'🍞', cover:'img/chleba-sunka.jpg' },
+  { id:'comfy', name:'Comfy', emoji:'🛋️', cover:'img/cod-mash.jpg' },
+  { id:'czech', name:'Czech', emoji:'🇨🇿', cover:'img/rajska.jpg' },
+  { id:'quick', name:'Quick', emoji:'⚡', cover:'img/carbonara.jpg' },
+  { id:'light', name:'Light', emoji:'🌿', cover:'img/avo-asparagus.jpg' },
+];
+
+// ---------- Meals ----------
+// Photo convention: img/<meal id>.jpg   Tags = which themes the meal shows under.
+const TBC = ['TBC'];
+const MEALS = [
+  { id:'beetroot-risotto', name:'Beetroot risotto',  tags:['pasta','comfy'],              ingredients:TBC },
+  { id:'carbonara',        name:'Carbonara',         tags:['pasta','comfy','quick'],      ingredients:TBC },
+  { id:'gnocchi-anchovy',  name:'Gnocchi anchovy',   tags:['pasta','quick'],              ingredients:TBC },
+  { id:'burgers',          name:'Beef burger',       tags:['meat','comfy'],
+    ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] },
+  { id:'ribeye',           name:'Ribeye steak',      tags:['meat'],               ingredients:TBC },
+  { id:'fajitas',          name:'Fajitas',           tags:['meat','comfy'],                       ingredients:TBC },
+  { id:'potato-soup',      name:'Potato soup',       tags:['soup','czech','comfy'],       ingredients:TBC },
+  { id:'cesnecka',         name:'Garlic soup',       tags:['soup','czech','comfy'],
+    ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] },
+  { id:'pumpkin-soup',     name:'Pumpkin soup',      tags:['soup','comfy'],       ingredients:TBC },
+  { id:'teriyaki-salmon',  name:'Teriyaki salmon',   tags:['fish','quick'],       ingredients:TBC },
+  { id:'cod-mash',         name:'Cod potato mash',   tags:['fish','comfy'],               ingredients:TBC },
+  { id:'pepper-goat',      name:'Pepper goat cheese',tags:['salad','light','quick'],      ingredients:TBC },
+  { id:'pumpkin-salad',    name:'Pumpkin salad',     tags:['salad','light'],              ingredients:TBC },
+  { id:'avo-asparagus',    name:'Avo asparagus',     tags:['salad','light'],      ingredients:TBC },
+  { id:'chleba-sunka',     name:'Chleba se šunkou',  tags:['bread','quick'],              ingredients:TBC },
+  { id:'rajska',           name:'Rajská a kolínka',  tags:['czech','comfy','pasta'],      ingredients:TBC },
+  { id:'veprove-mrkev',    name:'Vepřové s mrkví',   tags:['czech','comfy'],              ingredients:TBC },
 ];
 
 // ---------- Helpers ----------
 const $ = id => document.getElementById(id);
-const find = (t,m) => { const th=THEMES.find(x=>x.id===t); const me=th&&th.meals.find(x=>x.id===m); return me?{theme:th,meal:me}:null; };
-const allMeals = () => THEMES.flatMap(t=>t.meals.map(m=>({t:t.id,m:m.id})));
-const img = (x) => `<img src="img/${x.meal.id}.jpg" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()"><div class="ph" style="display:none">${x.theme.emoji}</div>`;
+const meal = id => MEALS.find(m=>m.id===id);
+const theme = id => THEMES.find(t=>t.id===id);
+const inTheme = t => MEALS.filter(m=>m.tags.includes(t));
+const byName = (a,b) => a.name.localeCompare(b.name,'cs');
+const emojiFor = m => (theme(m.tags[0])||{}).emoji || '🍽️';
+const img = (src, emoji) => `<img src="${src}" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()"><div class="ph" style="display:none">${emoji}</div>`;
 function mealTime(){ const d=new Date(); return (d.getDay()===0||d.getDay()===6) && d.getHours()<14 ? 'lunch' : 'dinner'; }
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1800); }
 function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); history.pushState({s:id},''); }
 window.addEventListener('popstate', e=>{ const s=(e.state&&e.state.s)||'home'; document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on')); $(s).classList.add('on'); });
 
-let infoOf = null;   // {theme, meal} shown on Info
-let picks = [];      // [{t,m}] max 2
+let infoOf = null;   // meal shown on Info
+let picks = [];      // meal ids, max 2
 
 // ---------- Rendering ----------
-function mealCard(x){
-  return `<div class="meal"><div class="photo">${img(x)}</div><div class="body"><h2>${x.meal.name}</h2>
-    <div class="actions"><button class="act pick" onclick="pick('${x.theme.id}','${x.meal.id}')">Pick</button><button class="act info" onclick="openInfo('${x.theme.id}','${x.meal.id}')">Info</button></div></div></div>`;
+function mealCard(m){
+  return `<div class="meal"><div class="photo">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="body"><h2>${m.name}</h2>
+    <div class="actions"><button class="act pick" onclick="pick('${m.id}')">Pick</button><button class="act info" onclick="openInfo('${m.id}')">Info</button></div></div></div>`;
 }
 function renderHome(){
   $('homeTitle').textContent = `What's for ${mealTime()}?`;
-  $('tiles').innerHTML = THEMES.map(t=>{ const cover=t.meals[0]; return `<button class="tile" onclick="openTheme('${t.id}')">${cover?`<img src="img/${cover.id}.jpg" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()">`:''}<div class="ph" style="display:${cover?'none':'flex'}">${t.emoji}</div><div class="label">${t.name}<small>${t.meals.length} meal${t.meals.length===1?'':'s'}</small></div></button>`; }).join('');
+  $('tiles').innerHTML = THEMES.map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
 }
-function openTheme(id){ const t=THEMES.find(x=>x.id===id); $('themeTitle').textContent=t.name; $('mealList').innerHTML=t.meals.map(m=>mealCard({theme:t,meal:m})).join(''); go('theme'); }
-function openInfo(t,m){ infoOf=find(t,m); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.meal.name}</h2><ul class="ing">${infoOf.meal.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
-function openAll(){ const items=allMeals().map(p=>find(p.t,p.m)).sort((a,b)=>a.meal.name.localeCompare(b.meal.name,'cs')); $('allList').innerHTML=items.map(mealCard).join(''); go('all'); }
+function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; $('mealList').innerHTML=inTheme(id).sort(byName).map(mealCard).join(''); go('theme'); }
+function openAll(){ $('allList').innerHTML=[...MEALS].sort(byName).map(mealCard).join(''); go('all'); }
+function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
 // ---------- Ingredients → Notes ----------
-async function copyIngredients(){ const s=`${infoOf.meal.name}\n`+infoOf.meal.ingredients.map(i=>'• '+i).join('\n'); try{ await navigator.clipboard.writeText(s); toast('Copied — paste into Notes'); }catch(e){ prompt('Copy this:', s); } }
+async function copyIngredients(){ const s=`${infoOf.name}\n`+infoOf.ingredients.map(i=>'• '+i).join('\n'); try{ await navigator.clipboard.writeText(s); toast('Copied — paste into Notes'); }catch(e){ prompt('Copy this:', s); } }
 
 // ---------- Pick → share ----------
-function pick(t,m){ if(!picks.some(p=>p.t===t&&p.m===m)) picks.push({t,m}); picks=picks.slice(-2); renderProposal(); go('proposal'); }
-function pickFromInfo(){ pick(infoOf.theme.id, infoOf.meal.id); }
+function pick(id){ if(!picks.includes(id)) picks.push(id); picks=picks.slice(-2); renderProposal(); go('proposal'); }
+function pickFromInfo(){ pick(infoOf.id); }
 function removePick(i){ picks.splice(i,1); if(!picks.length) return go('home'); renderProposal(); }
 function renderProposal(){
-  $('proposalCards').innerHTML = picks.map((p,i)=>{ const x=find(p.t,p.m); return `<div class="mini"><div class="thumb">${img(x)}</div><div class="t"><b>${x.meal.name}</b><span>${picks.length>1?'Option '+(i+1):''}</span></div><button class="x" onclick="removePick(${i})" aria-label="Remove">×</button></div>`; }).join('');
+  $('proposalCards').innerHTML = picks.map((id,i)=>{ const m=meal(id); return `<div class="mini"><div class="thumb">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="t"><b>${m.name}</b><span>${picks.length>1?'Option '+(i+1):''}</span></div><button class="x" onclick="removePick(${i})" aria-label="Remove">×</button></div>`; }).join('');
   $('altBtn').style.display = picks.length>=2?'none':'flex';
 }
-function buildLink(){ const u=new URL(location.href); u.search=''; u.hash=''; u.searchParams.set('p', picks.map(p=>p.t+'.'+p.m).join(',')); return u.toString(); }
-function buildText(){ return `What's for ${mealTime()}? ${picks.map(p=>find(p.t,p.m).meal.name).join(' or ')} → `; }
+function buildLink(){ const u=new URL(location.href); u.search=''; u.hash=''; u.searchParams.set('p', picks.join(',')); return u.toString(); }
+function buildText(){ return `What's for ${mealTime()}? ${picks.map(id=>meal(id).name).join(' or ')} → `; }
 async function share(){ const url=buildLink(), text=buildText(); if(navigator.share){ try{ await navigator.share({text,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copyLink(); }
 async function copyLink(){ const s=buildText()+buildLink(); try{ await navigator.clipboard.writeText(s); toast('Copied — paste it into a message'); }catch(e){ prompt('Copy this:', s); } }
 
 // ---------- Received ----------
 function renderReceived(param){
-  const items=param.split(',').map(s=>{ const [t,m]=s.split('.'); return find(t,m); }).filter(Boolean);
+  const items=param.split(',').map(s=>meal(s.includes('.')?s.split('.')[1]:s)).filter(Boolean);
   if(!items.length) return false;
   $('recvTitle').textContent=`What's for ${mealTime()}?`;
   $('recvSub').textContent = items.length>1 ? 'Two ideas — which one?' : 'One idea.';
-  $('recvCards').innerHTML = items.map((x,i)=>`<div class="meal"><div class="photo">${img(x)}</div><div class="body">${items.length>1?`<div class="pill">Option ${i+1}</div>`:''}<h2>${x.meal.name}</h2><ul class="ing" style="margin-top:10px">${x.meal.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div></div>`).join('');
+  $('recvCards').innerHTML = items.map((m,i)=>`<div class="meal"><div class="photo">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="body">${items.length>1?`<div class="pill">Option ${i+1}</div>`:''}<h2>${m.name}</h2><ul class="ing" style="margin-top:10px">${m.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div></div>`).join('');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $('received').classList.add('on');
   return true;
 }
