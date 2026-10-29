@@ -49,12 +49,9 @@
   .indexed{padding-right:22px}
   .azhead{font-size:15px;font-weight:600;color:var(--muted);margin:22px 2px 8px;letter-spacing:.02em}
   .azhead:first-child{margin-top:0}
-  .azbar{position:fixed;right:max(4px,env(safe-area-inset-right));top:54%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;padding:6px 4px;border-radius:12px;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none}
-  .azbar span{font-size:11px;line-height:1.75;font-weight:600;color:var(--tint);width:16px;text-align:center}
+  .azbar{position:fixed;right:max(4px,env(safe-area-inset-right));top:54%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;padding:6px 4px;z-index:5;user-select:none;-webkit-user-select:none}
+  .azbar span{font-size:11px;line-height:1.75;font-weight:600;color:var(--tint);width:20px;text-align:center;cursor:pointer}
   .azbar span.off{color:var(--muted);opacity:.45}
-  .azbar.active{background:rgba(118,118,128,.18)}
-  .azbubble{position:fixed;right:44px;top:50%;transform:translateY(-50%);width:64px;height:64px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:none;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:var(--ink);z-index:6;pointer-events:none}
-  .azbubble.on{display:flex}
   /* theme tiles */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
@@ -115,7 +112,6 @@
   <p class="sub">A–Z. Pick one, or tap Info for the ingredients.</p>
   <div id="allList" class="indexed"></div>
   <div class="azbar" id="azbar"></div>
-  <div class="azbubble" id="azbubble"></div>
 </section>
 
 <!-- THEME -->
@@ -288,22 +284,12 @@ function openAll(){
   $('azbar').innerHTML = LETTERS.map(L=>`<span data-l="${L}" class="${groups[L]?'':'off'}">${L}</span>`).join('');
   go('all');
 }
-(function(){
-  const bar=$('azbar'), bub=$('azbubble'); let last=null;
-  function jump(L){
-    // nearest section at or after L
-    const i=LETTERS.indexOf(L); let el=null;
-    for(let k=i;k<LETTERS.length&&!el;k++) el=$('az-'+LETTERS[k]);
-    if(!el) return;
-    bub.textContent=L; bub.classList.add('on');
-    if(L!==last){ last=L; const y=el.getBoundingClientRect().top+window.scrollY-12; window.scrollTo({top:y,behavior:'auto'}); if(navigator.vibrate) navigator.vibrate(3); }
-  }
-  function at(e){ const t=document.elementFromPoint(bar.getBoundingClientRect().left+8, e.clientY); return t&&t.dataset&&t.dataset.l; }
-  bar.addEventListener('pointerdown',e=>{ bar.setPointerCapture(e.pointerId); bar.classList.add('active'); const L=at(e); if(L) jump(L); e.preventDefault(); });
-  bar.addEventListener('pointermove',e=>{ if(!bar.classList.contains('active')) return; const L=at(e); if(L) jump(L); });
-  const end=()=>{ bar.classList.remove('active'); bub.classList.remove('on'); last=null; };
-  bar.addEventListener('pointerup',end); bar.addEventListener('pointercancel',end);
-})();
+$('azbar').addEventListener('click',e=>{
+  const L=e.target.dataset&&e.target.dataset.l; if(!L) return;
+  const i=LETTERS.indexOf(L); let el=null;
+  for(let k=i;k<LETTERS.length&&!el;k++) el=$('az-'+LETTERS[k]);   // nearest section at or after L
+  if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-12});
+});
 function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
 // ---------- Ingredients → Notes ----------
