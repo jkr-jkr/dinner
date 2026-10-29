@@ -39,6 +39,12 @@
   .btn.ghost{background:transparent;box-shadow:none;color:var(--muted);font-weight:500}
   .btn:active{opacity:.7}
 
+  /* segmented control */
+  .seg{display:flex;background:rgba(118,118,128,.12);border-radius:12px;padding:3px;margin:-6px 0 16px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--ink);font:600 15px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:10px;border-radius:9px;cursor:pointer}
+  .seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  @media (prefers-color-scheme: dark){ .seg{background:rgba(118,118,128,.24)} .seg button.on{background:#636366} }
+  .empty{color:var(--muted);text-align:center;padding:40px 0}
   /* theme tiles */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
@@ -86,7 +92,8 @@
 <!-- HOME -->
 <section id="home" class="screen">
   <h1 id="homeTitle">What's for dinner?</h1>
-  <p class="sub">Pick a theme, or see a full list of options</p>
+  <p class="sub">Pick a dish, mood or see a full list</p>
+  <div class="seg" role="tablist"><button id="segType" onclick="setKind('type')">Dish</button><button id="segMood" onclick="setKind('mood')">Mood</button></div>
   <div class="tiles" id="tiles"></div>
   <button class="btn primary" onclick="openAll()">See full list</button>
 </section>
@@ -141,41 +148,46 @@
 // ---------- Themes (filters) ----------
 // cover: any image path, or null for a plain grey tile
 const THEMES = [
-  { id:'soup',  name:'Soup',  emoji:'🥣', cover:'img/pumpkin-soup.jpg' },
-  { id:'pasta', name:'Pasta', emoji:'🍝', cover:'img/gnocchi-anchovy.jpg' },
-  { id:'meat',  name:'Meat',  emoji:'🥩', cover:'img/burgers.jpg' },
-  { id:'fish',  name:'Fish',  emoji:'🐟', cover:'img/teriyaki-salmon.jpg' },
-  { id:'salad', name:'Salad', emoji:'🥗', cover:'img/pumpkin-salad.jpg' },
-  { id:'bread', name:'Bread', emoji:'🍞', cover:'img/chleba-sunka.jpg' },
-  { id:'comfy', name:'Comfy', emoji:'🛋️', cover:'img/cod-mash.jpg' },
-  { id:'czech', name:'Czech', emoji:'🇨🇿', cover:'img/rajska.jpg' },
-  { id:'quick', name:'Quick', emoji:'⚡', cover:'img/carbonara.jpg' },
-  { id:'light', name:'Light', emoji:'🌿', cover:'img/avo-asparagus.jpg' },
+  // kind:'type' = dish type, kind:'mood' = theme/feeling. cover: image path or null (grey tile)
+  { id:'soup',   kind:'type', name:'Soup',   emoji:'🥣', cover:'img/pumpkin-soup.jpg' },
+  { id:'salad',  kind:'type', name:'Salad',  emoji:'🥗', cover:'img/pumpkin-salad.jpg' },
+  { id:'pasta',  kind:'type', name:'Pasta',  emoji:'🍝', cover:'img/gnocchi-anchovy.jpg' },
+  { id:'rice',   kind:'type', name:'Rice',   emoji:'🍚', cover:'img/beetroot-risotto.jpg' },
+  { id:'meat',   kind:'type', name:'Meat',   emoji:'🥩', cover:'img/burgers.jpg' },
+  { id:'fish',   kind:'type', name:'Fish',   emoji:'🐟', cover:'img/teriyaki-salmon.jpg' },
+  { id:'veggie', kind:'type', name:'Veggie', emoji:'🥦', cover:'img/pepper-goat.jpg' },
+  { id:'oven',   kind:'type', name:'Oven',   emoji:'🔥', cover:null },
+  { id:'czech',  kind:'type', name:'Czech',  emoji:'🇨🇿', cover:'img/rajska.jpg' },
+  { id:'bread',  kind:'type', name:'Bread',  emoji:'🍞', cover:'img/chleba-sunka.jpg' },
+  { id:'quick',   kind:'mood', name:'Quick',   emoji:'⚡', cover:'img/carbonara.jpg' },
+  { id:'comfy',   kind:'mood', name:'Comfy',   emoji:'🛋️', cover:'img/cod-mash.jpg' },
+  { id:'healthy', kind:'mood', name:'Healthy', emoji:'🌿', cover:'img/avo-asparagus.jpg' },
+  { id:'new',     kind:'mood', name:'New',     emoji:'✨', cover:null },
 ];
 
 // ---------- Meals ----------
 // Photo convention: img/<meal id>.jpg   Tags = which themes the meal shows under.
 const TBC = ['TBC'];
 const MEALS = [
-  { id:'beetroot-risotto', name:'Beetroot risotto',  tags:['pasta','comfy'],              ingredients:TBC },
-  { id:'carbonara',        name:'Carbonara',         tags:['pasta','comfy','quick'],      ingredients:TBC },
-  { id:'gnocchi-anchovy',  name:'Gnocchi anchovy',   tags:['pasta','quick'],              ingredients:TBC },
-  { id:'burgers',          name:'Beef burger',       tags:['meat','comfy'],
+  { id:'beetroot-risotto', name:'Beetroot risotto',    tags:['rice','veggie','comfy'],        ingredients:TBC },
+  { id:'carbonara',        name:'Carbonara',           tags:['pasta','comfy','quick'],        ingredients:TBC },
+  { id:'gnocchi-anchovy',  name:'Gnocchi anchovy',     tags:['pasta','quick'],                ingredients:TBC },
+  { id:'burgers',          name:'Burger',              tags:['meat','comfy'],
     ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] },
-  { id:'ribeye',           name:'Ribeye steak',      tags:['meat'],               ingredients:TBC },
-  { id:'fajitas',          name:'Fajitas',           tags:['meat','comfy'],                       ingredients:TBC },
-  { id:'potato-soup',      name:'Potato soup',       tags:['soup','czech','comfy'],       ingredients:TBC },
-  { id:'cesnecka',         name:'Garlic soup',       tags:['soup','czech','comfy'],
+  { id:'ribeye',           name:'Steak',               tags:['meat'],                         ingredients:TBC },
+  { id:'fajitas',          name:'Fajitas',             tags:['meat','comfy'],                 ingredients:TBC },
+  { id:'potato-soup',      name:'Bramboračka',         tags:['soup','czech','veggie','comfy'],ingredients:TBC },
+  { id:'cesnecka',         name:'Česnečka',            tags:['soup','czech','comfy'],
     ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] },
-  { id:'pumpkin-soup',     name:'Pumpkin soup',      tags:['soup','comfy'],       ingredients:TBC },
-  { id:'teriyaki-salmon',  name:'Teriyaki salmon',   tags:['fish','quick'],       ingredients:TBC },
-  { id:'cod-mash',         name:'Cod potato mash',   tags:['fish','comfy'],               ingredients:TBC },
-  { id:'pepper-goat',      name:'Pepper goat cheese',tags:['salad','light','quick'],      ingredients:TBC },
-  { id:'pumpkin-salad',    name:'Pumpkin salad',     tags:['salad','light'],              ingredients:TBC },
-  { id:'avo-asparagus',    name:'Avo asparagus',     tags:['salad','light'],      ingredients:TBC },
-  { id:'chleba-sunka',     name:'Chleba se šunkou',  tags:['bread','quick'],              ingredients:TBC },
-  { id:'rajska',           name:'Rajská a kolínka',  tags:['czech','comfy','pasta'],      ingredients:TBC },
-  { id:'veprove-mrkev',    name:'Vepřové s mrkví',   tags:['czech','comfy'],              ingredients:TBC },
+  { id:'pumpkin-soup',     name:'Pumpkin soup',        tags:['soup','veggie','comfy'],        ingredients:TBC },
+  { id:'teriyaki-salmon',  name:'Teriyaki salmon',     tags:['fish','quick'],                 ingredients:TBC },
+  { id:'cod-mash',         name:'Treska s kaší',       tags:['fish','comfy'],                 ingredients:TBC },
+  { id:'pepper-goat',      name:'Goat cheese salad',   tags:['salad','veggie','healthy','quick'], ingredients:TBC },
+  { id:'pumpkin-salad',    name:'Pumpkin salad',       tags:['salad','veggie','healthy'],     ingredients:TBC },
+  { id:'avo-asparagus',    name:'Avo asparagus salad', tags:['salad','veggie','healthy'],     ingredients:TBC },
+  { id:'chleba-sunka',     name:'Chleba se šunkou',    tags:['bread','quick'],                ingredients:TBC },
+  { id:'rajska',           name:'Rajská',              tags:['czech','comfy','pasta'],        ingredients:TBC },
+  { id:'veprove-mrkev',    name:'Dušená mrkev',        tags:['czech','comfy'],                ingredients:TBC },
 ];
 
 // ---------- Helpers ----------
@@ -199,11 +211,15 @@ function mealCard(m){
   return `<div class="meal"><div class="photo">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="body"><h2>${m.name}</h2>
     <div class="actions"><button class="act pick" onclick="pick('${m.id}')">Pick</button><button class="act info" onclick="openInfo('${m.id}')">Info</button></div></div></div>`;
 }
+let kind = 'type';
+try{ kind = localStorage.getItem('kind') || 'type'; }catch(e){}
+function setKind(k){ kind=k; try{ localStorage.setItem('kind',k); }catch(e){} renderHome(); }
 function renderHome(){
   $('homeTitle').textContent = `What's for ${mealTime()}?`;
-  $('tiles').innerHTML = THEMES.map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
+  $('segType').classList.toggle('on',kind==='type'); $('segMood').classList.toggle('on',kind==='mood');
+  $('tiles').innerHTML = THEMES.filter(t=>t.kind===kind).map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
 }
-function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; $('mealList').innerHTML=inTheme(id).sort(byName).map(mealCard).join(''); go('theme'); }
+function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; const ms=inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
 function openAll(){ $('allList').innerHTML=[...MEALS].sort(byName).map(mealCard).join(''); go('all'); }
 function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
