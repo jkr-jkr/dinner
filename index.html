@@ -52,6 +52,15 @@
   .azbar{position:fixed;right:max(4px,env(safe-area-inset-right));top:54%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;padding:6px 4px;z-index:5;user-select:none;-webkit-user-select:none}
   .azbar span{font-size:11px;line-height:1.75;font-weight:600;color:var(--tint);width:20px;text-align:center;cursor:pointer}
   .azbar span.off{color:var(--muted);opacity:.45}
+  /* ideas */
+  .addrow{display:flex;gap:10px;margin-bottom:18px}
+  .addrow input{flex:1;border:0;border-radius:12px;padding:14px 16px;font:17px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:var(--card);color:var(--ink);box-shadow:var(--shadow);outline:none}
+  .addrow input::placeholder{color:var(--muted)}
+  .addrow button{border:0;border-radius:12px;padding:0 18px;font:600 16px -apple-system,BlinkMacSystemFont,sans-serif;background:var(--tint);color:#fff;cursor:pointer}
+  .idea{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:14px 10px 14px 18px;margin-bottom:10px}
+  .idea .t{flex:1;font-size:18px;font-weight:600}
+  .idea .act{padding:10px 14px;font-size:15px}
+  .idea .x{background:none;border:0;color:var(--muted);font-size:22px;padding:6px 8px;cursor:pointer}
   /* theme tiles */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
@@ -120,6 +129,15 @@
   <h1 id="themeTitle"></h1>
   <p class="sub">Pick one, or tap Info for the ingredients.</p>
   <div id="mealList"></div>
+</section>
+
+<!-- NEW (ideas, stored on this phone) -->
+<section id="new" class="screen">
+  <button class="back" onclick="go('home')"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back</button>
+  <h1>New</h1>
+  <p class="sub">Ideas to try. Saved on this phone only.</p>
+  <form class="addrow" onsubmit="addIdea(event)"><input id="ideaInput" type="text" placeholder="e.g. Shakshuka" autocomplete="off" enterkeyhint="done"><button type="submit">Add</button></form>
+  <div id="ideaList"></div>
 </section>
 
 <!-- INFO -->
@@ -251,7 +269,7 @@ const meal = id => MEALS.find(m=>m.id===id);
 const theme = id => THEMES.find(t=>t.id===id);
 const inTheme = t => MEALS.filter(m=>m.tags.includes(t));
 const byName = (a,b) => a.name.localeCompare(b.name,'cs');
-const emojiFor = m => (theme(m.tags[0])||{}).emoji || '🍽️';
+const emojiFor = m => m.idea ? '✨' : ((theme(m.tags[0])||{}).emoji || '🍽️');
 const img = (src, emoji) => `<img src="${src}" alt="" onerror="this.nextElementSibling.style.display='flex';this.remove()"><div class="ph" style="display:none">${emoji}</div>`;
 function mealTime(){ const d=new Date(); return (d.getDay()===0||d.getDay()===6) && d.getHours()<14 ? 'lunch' : 'dinner'; }
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1800); }
@@ -272,9 +290,9 @@ function setKind(k){ kind=k; try{ localStorage.setItem('kind',k); }catch(e){} re
 function renderHome(){
   $('homeTitle').textContent = `What's for ${mealTime()}?`;
   $('segType').classList.toggle('on',kind==='type'); $('segMood').classList.toggle('on',kind==='mood');
-  $('tiles').innerHTML = THEMES.filter(t=>t.kind===kind).map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
+  $('tiles').innerHTML = THEMES.filter(t=>t.kind===kind).map(t=>{ const n=t.id==='new'?loadIdeas().length:inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} ${t.id==='new'?'idea':'meal'}${n===1?'':'s'}</small></div></button>`; }).join('');
 }
-function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; const ms=ORDER[id]?ORDER[id].map(meal).filter(Boolean):inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
+function openTheme(id){ if(id==='new') return openNew(); const t=theme(id); $('themeTitle').textContent=t.name; const ms=ORDER[id]?ORDER[id].map(meal).filter(Boolean):inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
 const fold = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 function openAll(){
@@ -292,6 +310,22 @@ $('azbar').addEventListener('click',e=>{
 });
 function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
+// ---------- Ideas (New) — localStorage on this phone ----------
+function loadIdeas(){ try{ return JSON.parse(localStorage.getItem('ideas')||'[]'); }catch(e){ return []; } }
+function saveIdeas(l){ try{ localStorage.setItem('ideas',JSON.stringify(l)); }catch(e){} }
+function openNew(){ renderIdeas(); go('new'); }
+function renderIdeas(){
+  const l=loadIdeas();
+  $('ideaList').innerHTML = l.length ? l.map((n,i)=>`<div class="idea"><div class="t">${esc(n)}</div><button class="act pick" onclick="pickIdea(${i})">Pick</button><button class="x" onclick="removeIdea(${i})" aria-label="Remove">×</button></div>`).join('')
+    : '<p class="empty">Nothing yet. Add an idea above.</p>';
+}
+function addIdea(e){ e.preventDefault(); const inp=$('ideaInput'); const v=inp.value.trim(); if(!v) return; const l=loadIdeas(); if(!l.includes(v)) l.unshift(v); saveIdeas(l); inp.value=''; renderIdeas(); renderHome(); }
+function removeIdea(i){ const l=loadIdeas(); l.splice(i,1); saveIdeas(l); renderIdeas(); renderHome(); }
+function pickIdea(i){ pick('~'+loadIdeas()[i]); }
+const esc = t => t.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// a pick id starting with ~ is a free-text idea, not a repertoire meal
+function resolve(id){ return id.startsWith('~') ? {id, name:id.slice(1), tags:['new'], ingredients:[], idea:true} : meal(id); }
+
 // ---------- Ingredients → Notes ----------
 async function copyIngredients(){ const s=`${infoOf.name}\n`+infoOf.ingredients.map(i=>'• '+i).join('\n'); try{ await navigator.clipboard.writeText(s); toast('Copied — paste into Notes'); }catch(e){ prompt('Copy this:', s); } }
 
@@ -300,21 +334,21 @@ function pick(id){ if(!picks.includes(id)) picks.push(id); picks=picks.slice(-2)
 function pickFromInfo(){ pick(infoOf.id); }
 function removePick(i){ picks.splice(i,1); if(!picks.length) return go('home'); renderProposal(); }
 function renderProposal(){
-  $('proposalCards').innerHTML = picks.map((id,i)=>{ const m=meal(id); return `<div class="mini"><div class="thumb">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="t"><b>${m.name}</b><span>${picks.length>1?'Option '+(i+1):''}</span></div><button class="x" onclick="removePick(${i})" aria-label="Remove">×</button></div>`; }).join('');
+  $('proposalCards').innerHTML = picks.map((id,i)=>{ const m=resolve(id); return `<div class="mini"><div class="thumb">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="t"><b>${m.name}</b><span>${picks.length>1?'Option '+(i+1):''}</span></div><button class="x" onclick="removePick(${i})" aria-label="Remove">×</button></div>`; }).join('');
   $('altBtn').style.display = picks.length>=2?'none':'flex';
 }
 function buildLink(){ const u=new URL(location.href); u.search=''; u.hash=''; u.searchParams.set('p', picks.join(',')); return u.toString(); }
-function buildText(){ return `What's for ${mealTime()}? ${picks.map(id=>meal(id).name).join(' or ')} → `; }
+function buildText(){ return `What's for ${mealTime()}? ${picks.map(id=>resolve(id).name).join(' or ')} → `; }
 async function share(){ const url=buildLink(), text=buildText(); if(navigator.share){ try{ await navigator.share({text,url}); return; }catch(e){ if(e.name==='AbortError') return; } } copyLink(); }
 async function copyLink(){ const s=buildText()+buildLink(); try{ await navigator.clipboard.writeText(s); toast('Copied — paste it into a message'); }catch(e){ prompt('Copy this:', s); } }
 
 // ---------- Received ----------
 function renderReceived(param){
-  const items=param.split(',').map(s=>meal(s.includes('.')?s.split('.')[1]:s)).filter(Boolean);
+  const items=param.split(',').map(s=>resolve(s.includes('.')&&!s.startsWith('~')?s.split('.')[1]:s)).filter(Boolean);
   if(!items.length) return false;
   $('recvTitle').textContent=`What's for ${mealTime()}?`;
   $('recvSub').textContent = items.length>1 ? 'Two ideas — which one?' : 'One idea.';
-  $('recvCards').innerHTML = items.map((m,i)=>`<div class="meal"><div class="photo">${img('img/'+m.id+'.jpg', emojiFor(m))}</div><div class="body">${items.length>1?`<div class="pill">Option ${i+1}</div>`:''}<h2>${m.name}</h2><ul class="ing" style="margin-top:10px">${m.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div></div>`).join('');
+  $('recvCards').innerHTML = items.map((m,i)=>`<div class="meal">${m.idea?'':`<div class="photo">${img('img/'+m.id+'.jpg', emojiFor(m))}</div>`}<div class="body">${items.length>1?`<div class="pill">Option ${i+1}</div>`:''}${m.idea?'<div class="pill">New idea</div>':''}<h2>${esc(m.name)}</h2>${m.ingredients.length?`<ul class="ing" style="margin-top:10px">${m.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}</div></div>`).join('');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $('received').classList.add('on');
   return true;
 }
