@@ -155,40 +155,87 @@ const THEMES = [
   { id:'rice',   kind:'type', name:'Rice',   emoji:'🍚', cover:'img/beetroot-risotto.jpg' },
   { id:'meat',   kind:'type', name:'Meat',   emoji:'🥩', cover:'img/burgers.jpg' },
   { id:'fish',   kind:'type', name:'Fish',   emoji:'🐟', cover:'img/teriyaki-salmon.jpg' },
-  { id:'veggie', kind:'type', name:'Veggie', emoji:'🥦', cover:'img/pepper-goat.jpg' },
-  { id:'oven',   kind:'type', name:'Oven',   emoji:'🔥', cover:null },
+  { id:'veggie', kind:'type', name:'Veggie', emoji:'🥦', cover:'img/pecene-lilky.jpg' },
+  { id:'oven',   kind:'type', name:'Oven',   emoji:'🔥', cover:'img/rajcata-burrata.jpg' },
   { id:'czech',  kind:'type', name:'Czech',  emoji:'🇨🇿', cover:'img/rajska.jpg' },
   { id:'bread',  kind:'type', name:'Bread',  emoji:'🍞', cover:'img/chleba-sunka.jpg' },
   { id:'quick',   kind:'mood', name:'Quick',   emoji:'⚡', cover:'img/carbonara.jpg' },
   { id:'comfy',   kind:'mood', name:'Comfy',   emoji:'🛋️', cover:'img/cod-mash.jpg' },
   { id:'healthy', kind:'mood', name:'Healthy', emoji:'🌿', cover:'img/avo-asparagus.jpg' },
-  { id:'new',     kind:'mood', name:'New',     emoji:'✨', cover:null },
+  { id:'new',     kind:'mood', name:'New',     emoji:'✨', cover:'img/new-cover.jpg' },
 ];
 
 // ---------- Meals ----------
 // Photo convention: img/<meal id>.jpg   Tags = which themes the meal shows under.
 const TBC = ['TBC'];
 const MEALS = [
-  { id:'beetroot-risotto', name:'Beetroot risotto',    tags:['rice','veggie','comfy'],        ingredients:TBC },
-  { id:'carbonara',        name:'Carbonara',           tags:['pasta','comfy','quick'],        ingredients:TBC },
-  { id:'gnocchi-anchovy',  name:'Gnocchi anchovy',     tags:['pasta','quick'],                ingredients:TBC },
-  { id:'burgers',          name:'Burger',              tags:['meat','comfy'],
-    ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] },
-  { id:'ribeye',           name:'Steak',               tags:['meat'],                         ingredients:TBC },
-  { id:'fajitas',          name:'Fajitas',             tags:['meat','comfy'],                 ingredients:TBC },
-  { id:'potato-soup',      name:'Bramboračka',         tags:['soup','czech','veggie','comfy'],ingredients:TBC },
-  { id:'cesnecka',         name:'Česnečka',            tags:['soup','czech','comfy'],
-    ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] },
-  { id:'pumpkin-soup',     name:'Pumpkin soup',        tags:['soup','veggie','comfy'],        ingredients:TBC },
-  { id:'teriyaki-salmon',  name:'Teriyaki salmon',     tags:['fish','quick'],                 ingredients:TBC },
-  { id:'cod-mash',         name:'Treska s kaší',       tags:['fish','comfy'],                 ingredients:TBC },
-  { id:'pepper-goat',      name:'Goat cheese salad',   tags:['salad','veggie','healthy','quick'], ingredients:TBC },
-  { id:'pumpkin-salad',    name:'Pumpkin salad',       tags:['salad','veggie','healthy'],     ingredients:TBC },
-  { id:'avo-asparagus',    name:'Avo asparagus salad', tags:['salad','veggie','healthy'],     ingredients:TBC },
-  { id:'chleba-sunka',     name:'Chleba se šunkou',    tags:['bread','quick'],                ingredients:TBC },
-  { id:'rajska',           name:'Rajská',              tags:['czech','comfy','pasta'],        ingredients:TBC },
-  { id:'veprove-mrkev',    name:'Dušená mrkev',        tags:['czech','comfy'],                ingredients:TBC },
+  { id:'vyvar', name:'Vývar', tags:['soup','comfy','healthy'], ingredients:TBC },
+  { id:'potato-soup', name:'Bramboračka', tags:['soup','czech','comfy'], ingredients:TBC },
+  { id:'cesnecka', name:'Česnečka', tags:['soup','czech','comfy','healthy'], ingredients:['Garlic (1 head)','Potatoes (3–4)','Stock or bouillon cubes','Eggs (2)','Bread for croutons','Marjoram','Caraway seeds','Butter or lard'] },
+  { id:'cockova', name:'Čočková', tags:['soup','czech'], ingredients:TBC },
+  { id:'pumpkin-soup', name:'Dýňová', tags:['soup'], ingredients:TBC },
+  { id:'zelnacka', name:'Zelňačka', tags:['soup','czech','comfy','healthy'], ingredients:TBC },
+  { id:'bowl', name:'Bowl', tags:['salad','comfy','healthy'], ingredients:TBC },
+  { id:'pepper-goat', name:'Goat cheese salad', tags:['salad','quick','healthy'], ingredients:TBC },
+  { id:'pumpkin-salad', name:'Pumpkin salad', tags:['salad','healthy'], ingredients:TBC },
+  { id:'caprese', name:'Caprese', tags:['salad','quick','healthy'], ingredients:TBC },
+  { id:'avo-asparagus', name:'Avo asparagus salad', tags:['salad','healthy'], ingredients:TBC },
+  { id:'greek-salad', name:'Greek salad', tags:['salad','healthy'], ingredients:TBC },
+  { id:'carbonara', name:'Carbonara', tags:['pasta','quick','comfy'], ingredients:TBC },
+  { id:'bolognese', name:'Bolognese', tags:['pasta','comfy'], ingredients:TBC },
+  { id:'gnocchi-anchovy', name:'Gnocchi anchovy', tags:['pasta','quick'], ingredients:TBC },
+  { id:'gnocchi-sage', name:'Gnocchi sage', tags:['pasta'], ingredients:TBC },
+  { id:'rajska', name:'Rajská', tags:['pasta','czech','comfy'], ingredients:TBC },
+  { id:'aglio-olio', name:'Aglio e olio', tags:['pasta','quick'], ingredients:TBC },
+  { id:'pizza', name:'Homemade pizza', tags:['pasta','oven','quick','comfy'], ingredients:TBC },
+  { id:'beetroot-risotto', name:'Beetroot risotto', tags:['rice','comfy'], ingredients:TBC },
+  { id:'mushroom-risotto', name:'Mushroom risotto', tags:['rice'], ingredients:TBC },
+  { id:'asparagus-risotto', name:'Asparagus risotto', tags:['rice'], ingredients:TBC },
+  { id:'chicken-teriyaki', name:'Chicken teriyaki', tags:['rice'], ingredients:TBC },
+  { id:'rice-curry', name:'Rice & curry', tags:['rice'], ingredients:TBC },
+  { id:'fried-rice', name:'Fried rice', tags:['rice'], ingredients:TBC },
+  { id:'burgers', name:'Burger', tags:['meat','quick','comfy'], ingredients:['Minced beef (500 g)','Burger buns (4)','Cheddar slices','Onion (1)','Tomato (1)','Lettuce','Pickles','Ketchup / mustard'] },
+  { id:'ribeye', name:'Steak', tags:['meat','comfy'], ingredients:TBC },
+  { id:'kure-kase', name:'Kuře s kaší', tags:['meat','czech','comfy'], ingredients:TBC },
+  { id:'kure-brambor', name:'Kuře brambor', tags:['meat','oven','quick','comfy'], ingredients:TBC },
+  { id:'kachna', name:'Kachna', tags:['meat'], ingredients:TBC },
+  { id:'fajitas', name:'Fajitas', tags:['meat','comfy'], ingredients:TBC },
+  { id:'veprove-mrkev', name:'Dušená mrkev', tags:['meat','czech','comfy'], ingredients:TBC },
+  { id:'slow-roast', name:'Slow roast', tags:['meat','oven','comfy'], ingredients:TBC },
+  { id:'teriyaki-salmon', name:'Teriyaki salmon', tags:['fish'], ingredients:TBC },
+  { id:'losos-brambor', name:'Losos brambor', tags:['fish','quick','healthy'], ingredients:TBC },
+  { id:'cod-mash', name:'Treska s kaší', tags:['fish','comfy','healthy'], ingredients:TBC },
+  { id:'treska-polenta', name:'Treska polenta', tags:['fish','healthy'], ingredients:TBC },
+  { id:'tuna-steak', name:'Tuna steak', tags:['fish','healthy'], ingredients:TBC },
+  { id:'shrimp-curry', name:'Shrimp curry', tags:['fish'], ingredients:TBC },
+  { id:'octopus', name:'Octopus', tags:['fish','healthy'], ingredients:TBC },
+  { id:'pecene-lilky', name:'Pečené lilky', tags:['veggie','oven','comfy','healthy'], ingredients:TBC },
+  { id:'plnene-papriky', name:'Plněné papriky', tags:['veggie','comfy'], ingredients:TBC },
+  { id:'spenat-brambor', name:'Špenát brambor', tags:['veggie','czech','quick','comfy'], ingredients:TBC },
+  { id:'cocka-vejce', name:'Čočka s vejcem', tags:['veggie','czech','quick','comfy'], ingredients:TBC },
+  { id:'dal-makhani', name:'Dal makhani', tags:['veggie','comfy'], ingredients:TBC },
+  { id:'smazeny-kvetak', name:'Smažený květák', tags:['veggie','czech'], ingredients:TBC },
+  { id:'leco', name:'Lečo', tags:['veggie','czech','quick','comfy','healthy'], ingredients:TBC },
+  { id:'rajcata-burrata', name:'Rajčata s burratou', tags:['oven','quick','healthy'], ingredients:TBC },
+  { id:'noky-mak', name:'Noky s mákem', tags:['czech','quick'], ingredients:TBC },
+  { id:'chleba-sunka', name:'Chleba se šunkou', tags:['bread','quick'], ingredients:TBC },
+  { id:'topinky-syr', name:'Topinky se sýrem', tags:['bread','quick'], ingredients:TBC },
+  { id:'chleba-vajicko', name:'Chleba ve vajíčku', tags:['bread','quick'], ingredients:TBC },
+  { id:'avocado-toast', name:'Avocado toast', tags:['bread','quick','healthy'], ingredients:TBC },
 ];
+// Display order inside each dish type (moods fall back to A–Z)
+const ORDER = {
+  soup:['vyvar','potato-soup','cesnecka','cockova','pumpkin-soup','zelnacka'],
+  salad:['bowl','pepper-goat','pumpkin-salad','caprese','avo-asparagus','greek-salad'],
+  pasta:['carbonara','bolognese','gnocchi-anchovy','gnocchi-sage','rajska','aglio-olio','pizza'],
+  rice:['beetroot-risotto','mushroom-risotto','asparagus-risotto','chicken-teriyaki','rice-curry','fried-rice'],
+  meat:['burgers','ribeye','kure-kase','kure-brambor','kachna','fajitas','veprove-mrkev','slow-roast'],
+  fish:['teriyaki-salmon','losos-brambor','cod-mash','treska-polenta','tuna-steak','shrimp-curry','octopus'],
+  veggie:['pecene-lilky','plnene-papriky','spenat-brambor','cocka-vejce','dal-makhani','smazeny-kvetak','leco'],
+  oven:['rajcata-burrata','kure-brambor','pecene-lilky','slow-roast','pizza'],
+  czech:['potato-soup','cesnecka','cockova','zelnacka','rajska','veprove-mrkev','cocka-vejce','kure-kase','spenat-brambor','smazeny-kvetak','noky-mak','leco'],
+  bread:['chleba-sunka','topinky-syr','chleba-vajicko','avocado-toast'],
+};
 
 // ---------- Helpers ----------
 const $ = id => document.getElementById(id);
@@ -219,7 +266,7 @@ function renderHome(){
   $('segType').classList.toggle('on',kind==='type'); $('segMood').classList.toggle('on',kind==='mood');
   $('tiles').innerHTML = THEMES.filter(t=>t.kind===kind).map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
 }
-function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; const ms=inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
+function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; const ms=ORDER[id]?ORDER[id].map(meal).filter(Boolean):inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
 function openAll(){ $('allList').innerHTML=[...MEALS].sort(byName).map(mealCard).join(''); go('all'); }
 function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
