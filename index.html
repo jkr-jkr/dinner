@@ -45,6 +45,16 @@
   .seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
   @media (prefers-color-scheme: dark){ .seg{background:rgba(118,118,128,.24)} .seg button.on{background:#636366} }
   .empty{color:var(--muted);text-align:center;padding:40px 0}
+  /* A–Z index (All meals) */
+  .indexed{padding-right:22px}
+  .azhead{font-size:15px;font-weight:600;color:var(--muted);margin:22px 2px 8px;letter-spacing:.02em}
+  .azhead:first-child{margin-top:0}
+  .azbar{position:fixed;right:max(4px,env(safe-area-inset-right));top:54%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;padding:6px 4px;border-radius:12px;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none}
+  .azbar span{font-size:11px;line-height:1.75;font-weight:600;color:var(--tint);width:16px;text-align:center}
+  .azbar span.off{color:var(--muted);opacity:.45}
+  .azbar.active{background:rgba(118,118,128,.18)}
+  .azbubble{position:fixed;right:44px;top:50%;transform:translateY(-50%);width:64px;height:64px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:none;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:var(--ink);z-index:6;pointer-events:none}
+  .azbubble.on{display:flex}
   /* theme tiles */
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tile{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;border:0;padding:0;cursor:pointer;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--ph1),var(--ph2))}
@@ -92,7 +102,7 @@
 <!-- HOME -->
 <section id="home" class="screen">
   <h1 id="homeTitle">What's for dinner?</h1>
-  <p class="sub">Pick a dish, mood or see a full list</p>
+  <p class="sub">Pick a dish type, mood or see a full list</p>
   <div class="seg" role="tablist"><button id="segType" onclick="setKind('type')">Dish</button><button id="segMood" onclick="setKind('mood')">Mood</button></div>
   <div class="tiles" id="tiles"></div>
   <button class="btn primary" onclick="openAll()">See full list</button>
@@ -103,7 +113,9 @@
   <button class="back" onclick="go('home')"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back</button>
   <h1>All meals</h1>
   <p class="sub">A–Z. Pick one, or tap Info for the ingredients.</p>
-  <div id="allList"></div>
+  <div id="allList" class="indexed"></div>
+  <div class="azbar" id="azbar"></div>
+  <div class="azbubble" id="azbubble"></div>
 </section>
 
 <!-- THEME -->
@@ -149,18 +161,18 @@
 // cover: any image path, or null for a plain grey tile
 const THEMES = [
   // kind:'type' = dish type, kind:'mood' = theme/feeling. cover: image path or null (grey tile)
-  { id:'soup',   kind:'type', name:'Soup',   emoji:'🥣', cover:'img/pumpkin-soup.jpg' },
+  { id:'soup',   kind:'type', name:'Soup',   emoji:'🥣', cover:'img/vyvar.jpg' },
   { id:'salad',  kind:'type', name:'Salad',  emoji:'🥗', cover:'img/pumpkin-salad.jpg' },
-  { id:'pasta',  kind:'type', name:'Pasta',  emoji:'🍝', cover:'img/gnocchi-anchovy.jpg' },
+  { id:'pasta',  kind:'type', name:'Pasta',  emoji:'🍝', cover:'img/carbonara.jpg' },
   { id:'rice',   kind:'type', name:'Rice',   emoji:'🍚', cover:'img/beetroot-risotto.jpg' },
-  { id:'meat',   kind:'type', name:'Meat',   emoji:'🥩', cover:'img/burgers.jpg' },
+  { id:'meat',   kind:'type', name:'Meat',   emoji:'🥩', cover:'img/kure-kase.jpg' },
   { id:'fish',   kind:'type', name:'Fish',   emoji:'🐟', cover:'img/teriyaki-salmon.jpg' },
   { id:'veggie', kind:'type', name:'Veggie', emoji:'🥦', cover:'img/pecene-lilky.jpg' },
   { id:'oven',   kind:'type', name:'Oven',   emoji:'🔥', cover:'img/rajcata-burrata.jpg' },
   { id:'czech',  kind:'type', name:'Czech',  emoji:'🇨🇿', cover:'img/rajska.jpg' },
-  { id:'bread',  kind:'type', name:'Bread',  emoji:'🍞', cover:'img/chleba-sunka.jpg' },
+  { id:'bread',  kind:'type', name:'Bread',  emoji:'🍞', cover:'img/avocado-toast.jpg' },
   { id:'quick',   kind:'mood', name:'Quick',   emoji:'⚡', cover:'img/carbonara.jpg' },
-  { id:'comfy',   kind:'mood', name:'Comfy',   emoji:'🛋️', cover:'img/cod-mash.jpg' },
+  { id:'comfy',   kind:'mood', name:'Comfy',   emoji:'🛋️', cover:'img/kure-kase.jpg' },
   { id:'healthy', kind:'mood', name:'Healthy', emoji:'🌿', cover:'img/avo-asparagus.jpg' },
   { id:'new',     kind:'mood', name:'New',     emoji:'✨', cover:'img/new-cover.jpg' },
 ];
@@ -186,7 +198,7 @@ const MEALS = [
   { id:'gnocchi-anchovy', name:'Gnocchi anchovy', tags:['pasta','quick'], ingredients:TBC },
   { id:'gnocchi-sage', name:'Gnocchi sage', tags:['pasta'], ingredients:TBC },
   { id:'rajska', name:'Rajská', tags:['pasta','czech','comfy'], ingredients:TBC },
-  { id:'aglio-olio', name:'Aglio e olio', tags:['pasta','quick'], ingredients:TBC },
+  { id:'aglio-olio', name:'Aglio, Olio & krevety', tags:['pasta','quick'], ingredients:TBC },
   { id:'pizza', name:'Homemade pizza', tags:['pasta','oven','quick','comfy'], ingredients:TBC },
   { id:'beetroot-risotto', name:'Beetroot risotto', tags:['rice','comfy'], ingredients:TBC },
   { id:'mushroom-risotto', name:'Mushroom risotto', tags:['rice'], ingredients:TBC },
@@ -267,7 +279,31 @@ function renderHome(){
   $('tiles').innerHTML = THEMES.filter(t=>t.kind===kind).map(t=>{ const n=inTheme(t.id).length; return `<button class="tile${t.cover?'':' plain'}" onclick="openTheme('${t.id}')">${t.cover?img(t.cover, t.emoji):''}<div class="label">${t.name}<small>${n} meal${n===1?'':'s'}</small></div></button>`; }).join('');
 }
 function openTheme(id){ const t=theme(id); $('themeTitle').textContent=t.name; const ms=ORDER[id]?ORDER[id].map(meal).filter(Boolean):inTheme(id).sort(byName); $('mealList').innerHTML=ms.length?ms.map(mealCard).join(''):'<p class="empty">No meals here yet.</p>'; go('theme'); }
-function openAll(){ $('allList').innerHTML=[...MEALS].sort(byName).map(mealCard).join(''); go('all'); }
+const fold = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+function openAll(){
+  const sorted=[...MEALS].sort((a,b)=>fold(a.name).localeCompare(fold(b.name)));
+  const groups={}; sorted.forEach(m=>{ const L=fold(m.name)[0]; (groups[L]=groups[L]||[]).push(m); });
+  $('allList').innerHTML = LETTERS.filter(L=>groups[L]).map(L=>`<div class="azhead" id="az-${L}">${L}</div>`+groups[L].map(mealCard).join('')).join('');
+  $('azbar').innerHTML = LETTERS.map(L=>`<span data-l="${L}" class="${groups[L]?'':'off'}">${L}</span>`).join('');
+  go('all');
+}
+(function(){
+  const bar=$('azbar'), bub=$('azbubble'); let last=null;
+  function jump(L){
+    // nearest section at or after L
+    const i=LETTERS.indexOf(L); let el=null;
+    for(let k=i;k<LETTERS.length&&!el;k++) el=$('az-'+LETTERS[k]);
+    if(!el) return;
+    bub.textContent=L; bub.classList.add('on');
+    if(L!==last){ last=L; const y=el.getBoundingClientRect().top+window.scrollY-12; window.scrollTo({top:y,behavior:'auto'}); if(navigator.vibrate) navigator.vibrate(3); }
+  }
+  function at(e){ const t=document.elementFromPoint(bar.getBoundingClientRect().left+8, e.clientY); return t&&t.dataset&&t.dataset.l; }
+  bar.addEventListener('pointerdown',e=>{ bar.setPointerCapture(e.pointerId); bar.classList.add('active'); const L=at(e); if(L) jump(L); e.preventDefault(); });
+  bar.addEventListener('pointermove',e=>{ if(!bar.classList.contains('active')) return; const L=at(e); if(L) jump(L); });
+  const end=()=>{ bar.classList.remove('active'); bub.classList.remove('on'); last=null; };
+  bar.addEventListener('pointerup',end); bar.addEventListener('pointercancel',end);
+})();
 function openInfo(id){ infoOf=meal(id); $('infoCard').innerHTML=`<div class="card"><h2>${infoOf.name}</h2><ul class="ing" style="margin-top:10px">${infoOf.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>`; go('info'); }
 
 // ---------- Ingredients → Notes ----------
